@@ -21,6 +21,7 @@ def generate_ksa_data(num_samples, key_size, rounds, block_size):
         keys=key_bits,
         last_round_keys=last_round_keys
     )
+    print(f"Сгенерировано {num_samples} примеров для RECTANGLE{block_size}/{key_size}.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -30,4 +31,4 @@ if __name__ == "__main__":
     parser.add_argument('--num_samples', type=int, required=True)
     args = parser.parse_args()
     
-    generate_data(args.num_samples, args.key_size, args.rounds, args.block_size)
+    generate_ksa_data(args.num_samples, args.key_size, args.rounds, args.block_size)
