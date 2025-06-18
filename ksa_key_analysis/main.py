@@ -4,7 +4,7 @@ import subprocess
 from argparse import ArgumentParser
 
 def get_cipher_params(cipher_name):
-    """Запрашиваем параметры шифра у пользователя"""
+    """Запрашиваем параметры шифра """
     params = {}
     
     if cipher_name == "PRESENT":
@@ -82,7 +82,7 @@ def get_cipher_params(cipher_name):
         params.update(configs[config])
         params['rounds'] = int(input("Введите число раундов: "))
     
-    # Для RECTANGLE добавим позже
+
     else:
         print(f"Шифр {cipher_name} пока не поддерживается")
         return None
@@ -138,7 +138,7 @@ def main():
             '--block_size', str(cipher_params.get('block_size', 64)),
             '--num_samples', str(train_params['train_samples'] + train_params['test_samples'])
         ]
-        if cipher_name in ['SIMON', 'SPECK']:
+        if cipher_name in ['SIMON', 'SPECK', 'RECTANGLE']:
             gen_cmd.extend(['--key_size', str(cipher_params['key_size'])])
         subprocess.run(gen_cmd)
         
