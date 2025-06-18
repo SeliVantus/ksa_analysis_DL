@@ -18,28 +18,33 @@ class RectangleCipher:
     def _apply_sbox(self, word):
         """Применение S-box к 4-битному слову"""
         return self.SBOX[word]
-    
-    def _key_update_80bit(self, key_state, round_const):
-        """Обновление 80-битного ключевого состояния"""
-        # 1. Применение S-box к правым 4 колонкам
-        for j in range(4):
-            nibble = ((key_state[3] >> (4*j))) & 0xF
-            nibble |= (((key_state[2] >> (4*j)) & 0xF)) << 4
-            nibble |= (((key_state[1] >> (4*j)) & 0xF)) << 8
-            nibble |= (((key_state[0] >> (4*j)) & 0xF)) << 12
-            s_out = self._apply_sbox(nibble)
-            
-            key_state[3] = (key_state[3] & ~(0xF << (4*j))) | ((s_out & 0xF) << (4*j))
-            key_state[2] = (key_state[2] & ~(0xF << (4*j))) | (((s_out >> 4) & 0xF) << (4*j))
-            key_state[1] = (key_state[1] & ~(0xF << (4*j))) | (((s_out >> 8) & 0xF) << (4*j))
-            key_state[0] = (key_state[0] & ~(0xF << (4*j))) | (((s_out >> 12) & 0xF) << (4*j))
         
-        # 2. Feistel-подобное преобразование
+    def _key_update_80bit(self, key_state, round_const):
+        for j in range(4):
+        # Получаем 4 nibble из текущей колонки j
+            nibble3 = (key_state[3] >> (4*j)) & 0xF
+            nibble2 = (key_state[2] >> (4*j)) & 0xF
+            nibble1 = (key_state[1] >> (4*j)) & 0xF
+            nibble0 = (key_state[0] >> (4*j)) & 0xF
+        
+        # Применяем S-box к каждому nibble
+            s_out3 = self._apply_sbox(nibble3)
+            s_out2 = self._apply_sbox(nibble2)
+            s_out1 = self._apply_sbox(nibble1)
+            s_out0 = self._apply_sbox(nibble0)
+        
+        # Обновляем ключевое состояние
+            key_state[3] = (key_state[3] & ~(0xF << (4*j))) | (s_out3 << (4*j))
+            key_state[2] = (key_state[2] & ~(0xF << (4*j))) | (s_out2 << (4*j))
+            key_state[1] = (key_state[1] & ~(0xF << (4*j))) | (s_out1 << (4*j))
+            key_state[0] = (key_state[0] & ~(0xF << (4*j))) | (s_out0 << (4*j))
+    
+    # 2. Feistel-подобное преобразование
         row0 = ((key_state[0] << 8) | (key_state[0] >> 8)) & 0xFFFF
         row0 ^= key_state[1]
         row3 = ((key_state[3] << 12) | (key_state[3] >> 4)) & 0xFFFF
         row3 ^= key_state[4]
-        
+    
         new_state = [
             row0,
             key_state[2],
@@ -47,45 +52,50 @@ class RectangleCipher:
             row3,
             key_state[0]
         ]
-        
-        # 3. Добавление round constant
+    
+    # 3. Добавление round constant
         rc_mask = (round_const & 0x1F) << 11
         new_state[0] ^= rc_mask
-        
+    
         return new_state
     
     def _key_update_128bit(self, key_state, round_const):
-        """Обновление 128-битного ключевого состояния"""
-        # 1. Применение S-box к правым 8 колонкам
         for j in range(8):
-            nibble = ((key_state[3] >> (4*j))) & 0xF
-            nibble |= (((key_state[2] >> (4*j)) & 0xF)) << 4
-            nibble |= (((key_state[1] >> (4*j)) & 0xF)) << 8
-            nibble |= (((key_state[0] >> (4*j)) & 0xF)) << 12
-            s_out = self._apply_sbox(nibble)
-            
-            key_state[3] = (key_state[3] & ~(0xF << (4*j))) | ((s_out & 0xF) << (4*j))
-            key_state[2] = (key_state[2] & ~(0xF << (4*j))) | (((s_out >> 4) & 0xF) << (4*j))
-            key_state[1] = (key_state[1] & ~(0xF << (4*j))) | (((s_out >> 8) & 0xF) << (4*j))
-            key_state[0] = (key_state[0] & ~(0xF << (4*j))) | (((s_out >> 12) & 0xF) << (4*j))
+            # Получаем 4 nibble из текущей колонки j
+            nibble3 = (key_state[3] >> (4*j)) & 0xF
+            nibble2 = (key_state[2] >> (4*j)) & 0xF
+            nibble1 = (key_state[1] >> (4*j)) & 0xF
+            nibble0 = (key_state[0] >> (4*j)) & 0xF
         
-        # 2. Feistel-подобное преобразование
+        # Применяем S-box к каждому nibble
+            s_out3 = self._apply_sbox(nibble3)
+            s_out2 = self._apply_sbox(nibble2)
+            s_out1 = self._apply_sbox(nibble1)
+            s_out0 = self._apply_sbox(nibble0)
+        
+        # Обновляем ключевое состояние
+            key_state[3] = (key_state[3] & ~(0xF << (4*j))) | (s_out3 << (4*j))
+            key_state[2] = (key_state[2] & ~(0xF << (4*j))) | (s_out2 << (4*j))
+            key_state[1] = (key_state[1] & ~(0xF << (4*j))) | (s_out1 << (4*j))
+            key_state[0] = (key_state[0] & ~(0xF << (4*j))) | (s_out0 << (4*j))
+    
+    # 2. Feistel-подобное преобразование для 128-битного ключа
         row0 = ((key_state[0] << 8) | (key_state[0] >> 24)) & 0xFFFFFFFF
         row0 ^= key_state[1]
         row2 = ((key_state[2] << 16) | (key_state[2] >> 16)) & 0xFFFFFFFF
         row2 ^= key_state[3]
-        
+    
         new_state = [
             row0,
             key_state[2],
             row2,
             key_state[0]
         ]
-        
-        # 3. Добавление round constant
-        rc_mask = (round_const & 0x1F) << 27
+    
+    # 3. Добавление round constant (для 128-бит смещение другое)
+        rc_mask = (round_const & 0x1F) << 27  # 27-й бит для 128-битного варианта
         new_state[0] ^= rc_mask
-        
+    
         return new_state
     
     def _generate_round_constants(self):
